@@ -21,20 +21,22 @@ def get_options(args=None):
     return options
 
 def main(options):
-    window_mean = 600
-    unit = 60
-    capacity_per_unit = 4
+    window_mean = 60
+    unit = 30
+    capacity_per_unit = 15
 
     net = sumolib.net.readNet(options.netfile)
     fo = open(options.outputfile, 'w')
     vehiclelist = sumolib.net.readVehicleList(options.routefile, net)
     vehiclelist.addBottlenecks('11950069')
-    vehiclelist.genRandomDuration(1.0/window_mean)
+    vehiclelist.genRandomDuration(window_mean)
     for v in vehiclelist._vehicles:
         fo.write(repr(v))
     
     scheduler = sumolib.net.Scheduler(unit, capacity_per_unit, vehiclelist)
     print scheduler()
+
+    sumolib.net.generateRouteFile("test_route.xml", scheduler)
 
     
 

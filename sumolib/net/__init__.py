@@ -41,6 +41,8 @@ from .roundabout import Roundabout
 import numpy as np
 #sys.path.append('/Users/hsuchieh/Documents/SUMO/python-constraint-1.2')
 from .constraint_rushhour import *
+import xml.etree.cElementTree as ET
+import operator
 
 
 class TLS:
@@ -498,6 +500,7 @@ class Vehicle:
     def __init__(self, id, depart):
         self._id = id
         self._depart = depart
+        self._newdepart = 0
         self._route = []
         self._timewindow = []
         self._timewindow_duration = 0
@@ -516,6 +519,8 @@ class Vehicle:
         end = start + self._timewindow_duration
         self._timewindow.append(start)
         self._timewindow.append(end)
+    def setNewDepart(self, newdeaprt):
+        self._newdepart = newdeaprt
 
     def getRoute(self):
         return self._route
@@ -523,6 +528,8 @@ class Vehicle:
         return self._timewindow
     def getID(self):
         return self._id
+    def getTimetoBottleneck(self):
+        return self._time_to_bottleneck
 
       
 
@@ -556,7 +563,8 @@ class VehicleList:
 
     def genRandomDuration(self, rate):
         for v in self._vehicles:
-            v.setTimeWindow(int(random.expovariate(rate)))
+            #v.setTimeWindow(int(random.expovariate(rate)))
+            v.setTimeWindow(random.randrange(5,15)*rate)
             
 
     def calcTimeDistance(self, route, bottleneck):
@@ -572,6 +580,9 @@ class VehicleList:
 
     def getVehicles(self):
         return self._vehicles
+
+    def getVehicle(self, id):
+        return self._id2vehicle[id]
 
 
     def __repr__(self):
@@ -594,6 +605,8 @@ class Scheduler:
         #for CSP solver 
         self._problem = None
         self._rushhour_capacity = capacity
+        self._solution = None
+        self._sorted_solution = None
 
     def setWindowList(self):
         window_list = []
@@ -617,6 +630,17 @@ class Scheduler:
         self._rushhour_period = np.max(windowlist) - self._rushhour_offset + 1 
         windowlist -= self._rushhour_offset
 
+    def calcNewDepart(self):
+        self._sorted_solution = self._solution.copy()
+        for v in self._vehiclelist.getVehicles():
+            newdeaprt = (self._solution[v.getID()]+ self._rushhour_offset)*self._unit - v.getTimetoBottleneck()
+            if newdeaprt < 0:
+                newdeaprt = 0
+            self._sorted_solution[v.getID()] = newdeaprt
+            v.setNewDepart(newdeaprt)
+        self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
+        print(self._sorted_solution)
+
     def capacityConstraint(self, time_index, *variables):
         count = 0
         for v in variables:
@@ -624,7 +648,6 @@ class Scheduler:
                 count += 1
         return count < self._rushhour_capacity
 
-   
     def __call__(self):
         self._problem = Problem(MinConflictsSolver())
         vehicles = self._vehiclelist.getVehicles()
@@ -638,7 +661,14 @@ class Scheduler:
         for i in range(self._rushhour_period):
             self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
 
-        return self._problem.getSolution()
+        self._solution = self._problem.getSolution()
+        self.calcNewDepart()
+        return self._solution
+
+    def getSortedSolution(self):
+        return self._sorted_solution
+    def getVehicleList(self):
+        return self._vehiclelist
    
 
 class VehicleListReader(handler.ContentHandler):
@@ -679,6 +709,24 @@ def readVehicleList(filename, net, **others):
         sys.exit(1)
 
     return vehiclelistreader.getVehicleList()
+
+def generateRouteFile(filename, scheduler):
+    routes_xml = ET.Element("routes", noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd", xsi="http://www.w3.org/2001/XMLSchema-instance")
+    
+    solution = scheduler.getSortedSolution()
+    vehiclelist = scheduler.getVehicleList()
+    for s in solution:
+        vehicle = vehiclelist.getVehicle(s[0])
+        depart = s[1]
+        vehicle_xml = ET.SubElement(routes_xml, "vehicle", depart="%s.00" % depart, id="%s" % s[0])
+        routes = ""
+        for r in vehicle.getRoute():
+            routes += str(r.getID())
+            routes += " "
+        ET.SubElement(vehicle_xml, "route", edges=routes)
+    
+    tree = ET.ElementTree(routes_xml)
+    tree.write(filename) 
 
 ''' end rush hour '''
 
