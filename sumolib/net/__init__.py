@@ -641,6 +641,18 @@ class Scheduler:
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
         print(self._sorted_solution)
 
+    def calcExNewDepart(self):
+        self._sorted_solution = {}
+        for v in self._vehiclelist.getVehicles():
+            window = self._id2window[v.getID()]
+            newdeaprt = (random.randrange(window[0], window[1]+1)+ self._rushhour_offset)*self._unit - v.getTimetoBottleneck()
+            if newdeaprt < 0:
+                newdeaprt = 0
+            self._sorted_solution[v.getID()] = newdeaprt
+            v.setNewDepart(newdeaprt)
+        self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
+        print(self._sorted_solution)
+
     def capacityConstraint(self, time_index, *variables):
         count = 0
         for v in variables:

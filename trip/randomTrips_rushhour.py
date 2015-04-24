@@ -28,6 +28,7 @@ SUMO_HOME = os.environ.get('SUMO_HOME',
         os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 sys.path.append(os.path.join(SUMO_HOME, 'tools'))
 import sumolib
+import random
 
 DUAROUTER = sumolib.checkBinary('duarouter')
 
@@ -210,6 +211,7 @@ def main(options):
     edge_generator = RandomTripGenerator(source_generator, sink_generator, via_generator, options.intermediate)
 
     idx = 0
+    bottlenecks = ['121593795', '24957029', '']
     with open(options.tripfile, 'w') as fouttrips:
         print >> fouttrips, """<?xml version="1.0"?>
 <!-- generated on %s by $Id: randomTrips.py 17235 2014-11-03 10:53:02Z behrisch $
@@ -233,8 +235,7 @@ def main(options):
                 via = ""
                 #if len(intermediate) > 0:
                 #    via='via="%s" ' % ' '.join([e.getID() for e in intermediate])
-                #via='via="28411466 54210159"'
-                via = 'via="11950069"'
+                via = 'via="11950069 %s"' % bottlenecks[random.randrange(len(bottlenecks))]
                 if options.pedestrians:
                     print >> fouttrips, '    <person id="%s" depart="%.2f" %s>' % (label, depart, options.tripattrs)
                     print >> fouttrips, '        <walk from="%s" to="%s"/>' % (source_edge.getID(), sink_edge.getID())
