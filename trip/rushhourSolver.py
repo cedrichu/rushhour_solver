@@ -17,24 +17,39 @@ def get_options(args=None):
                             help="define the net file (mandatory)")
     optParser.add_option("-o", "--output-file", dest="outputfile",
                             help="output sorted routing files")
+    optParser.add_option("--last", action="store_true",
+                         default=False, help="run last time slot case")
+    optParser.add_option("--rand", action="store_true",
+                         default=False, help="run random time slot case")
     (options, args) = optParser.parse_args(args=args)
     return options
 
 def main(options):
-    window_mean = 60
+    window_range = [5,15]
     unit = 30
     capacity_per_unit = 15
 
     net = sumolib.net.readNet(options.netfile)
     vehiclelist = sumolib.net.readVehicleList(options.routefile, net)
     vehiclelist.addBottlenecks('11950069')
-    vehiclelist.genRandomDuration(window_mean)
+    vehiclelist.genRandomDuration(unit,window_range)
   
     scheduler = sumolib.net.Scheduler(unit, capacity_per_unit, vehiclelist)
     print scheduler()
-    #scheduler.calcExNewDepart()
-
     sumolib.net.generateRouteFile(options.outputfile, scheduler)
+    
+    if options.rand:
+        scheduler.calcExNewDepart(1)
+        index = options.outputfile.find('.xml')
+        outputfile = options.outputfile[:index]+'_random'+ options.outputfile[index:]
+        sumolib.net.generateRouteFile(outputfile, scheduler)
+
+    if options.last:
+        scheduler.calcExNewDepart(2)
+        index = options.outputfile.find('.xml')
+        outputfile = options.outputfile[:index]+'_last'+ options.outputfile[index:]
+        sumolib.net.generateRouteFile(outputfile, scheduler)
+
 
     
 

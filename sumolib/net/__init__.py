@@ -561,10 +561,10 @@ class VehicleList:
             v.setTimetoBottleneck(time_to_bottleneck)
             v.setDistancetoBottleneck(distance_to_bottleneck)
 
-    def genRandomDuration(self, rate):
+    def genRandomDuration(self, unit, window_range):
         for v in self._vehicles:
             #v.setTimeWindow(int(random.expovariate(rate)))
-            v.setTimeWindow(random.randrange(5,15)*rate)
+            v.setTimeWindow(random.randrange(window_range[0], window_range[1]+1)*unit*3)
             
 
     def calcTimeDistance(self, route, bottleneck):
@@ -621,7 +621,7 @@ class Scheduler:
 
         for i,v in enumerate(vehicles):
             self._id2window[v.getID()] = window_list[i,:]
-            print(window_list[i,:])
+            #print(window_list[i,:])
     
         return window_list
     
@@ -641,11 +641,15 @@ class Scheduler:
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
         print(self._sorted_solution)
 
-    def calcExNewDepart(self):
+    def calcExNewDepart(self, option):
         self._sorted_solution = {}
         for v in self._vehiclelist.getVehicles():
             window = self._id2window[v.getID()]
-            newdeaprt = (random.randrange(window[0], window[1]+1)+ self._rushhour_offset)*self._unit - v.getTimetoBottleneck()
+            if option == 1:
+                time_slot = random.randrange(window[0], window[1]+1)
+            else:
+                time_slot = window[1]
+            newdeaprt = (time_slot+ self._rushhour_offset)*self._unit - v.getTimetoBottleneck()
             if newdeaprt < 0:
                 newdeaprt = 0
             self._sorted_solution[v.getID()] = newdeaprt
@@ -666,8 +670,8 @@ class Scheduler:
         for i,v in enumerate(vehicles):
             window = self._id2window[v.getID()]
             self._problem.addVariable(v.getID(),range(window[0], window[1]+1))
-            print(v.getID())
-            print(range(window[0], window[1]+1))
+            #print(v.getID())
+            #print(range(window[0], window[1]+1))
             #if i > 5:
              #   break
         for i in range(self._rushhour_period):
