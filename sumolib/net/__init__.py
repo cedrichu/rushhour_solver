@@ -670,7 +670,7 @@ class Scheduler:
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()
         capacity = self._rushhour_capacity
-        for step in range(1): 
+        for step in range(3): 
             self._problem = Problem(MinConflictsSolver(10))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
             for v in vehicles:
