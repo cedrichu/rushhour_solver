@@ -564,7 +564,7 @@ class VehicleList:
     def genRandomDuration(self, unit, window_range):
         for v in self._vehicles:
             #v.setTimeWindow(int(random.expovariate(rate)))
-            v.setTimeWindow(random.randrange(window_range[0], window_range[1]+1)*unit*3)
+            v.setTimeWindow(random.randrange(window_range[0], window_range[1]+1)*unit*2)
             
 
     def calcTimeDistance(self, route, bottleneck):
@@ -605,8 +605,11 @@ class Scheduler:
         #for CSP solver 
         self._problem = None
         self._rushhour_capacity = capacity
-        self._solution = None
+        self._solution = {}
         self._sorted_solution = None
+
+    def setRushHourCapacity(self, capacity):
+        self._rushhour_capacity = capacity
 
     def setWindowList(self):
         window_list = []
@@ -639,7 +642,7 @@ class Scheduler:
             self._sorted_solution[v.getID()] = newdeaprt
             v.setNewDepart(newdeaprt)
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
-        print(self._sorted_solution)
+        return self._sorted_solution
 
     def calcExNewDepart(self, option):
         self._sorted_solution = {}
@@ -655,7 +658,7 @@ class Scheduler:
             self._sorted_solution[v.getID()] = newdeaprt
             v.setNewDepart(newdeaprt)
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
-        print(self._sorted_solution)
+        return self._sorted_solution
 
     def capacityConstraint(self, time_index, *variables):
         count = 0
@@ -665,21 +668,21 @@ class Scheduler:
         return count < self._rushhour_capacity
 
     def __call__(self):
-        self._problem = Problem(MinConflictsSolver())
         vehicles = self._vehiclelist.getVehicles()
-        for i,v in enumerate(vehicles):
-            window = self._id2window[v.getID()]
-            self._problem.addVariable(v.getID(),range(window[0], window[1]+1))
-            #print(v.getID())
-            #print(range(window[0], window[1]+1))
-            #if i > 5:
-             #   break
-        for i in range(self._rushhour_period):
-            self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
+        capacity = self._rushhour_capacity
+        for step in range(3): 
+            self._problem = Problem(MinConflictsSolver())
+            self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
+            for v in vehicles:
+                window = self._id2window[v.getID()]
+                self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
+            self.setRushHourCapacity(capacity - step*2)
+            for i in range(self._rushhour_period):
+                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
+            self._solution = self._problem.getMinConflictSolution(self._solution)
+            print(self._solution)
 
-        self._solution = self._problem.getSolution()
-        self.calcNewDepart()
-        return self._solution
+        return self.calcNewDepart()
 
     def getSortedSolution(self):
         return self._sorted_solution

@@ -220,6 +220,28 @@ class Problem(object):
             return None
         return self._solver.getSolution(domains, constraints, vconstraints)
 
+    def getMinConflictSolution(self, assignments={}):
+        """
+        Find and return a solution to the problem
+
+        Example:
+
+        >>> problem = Problem()
+        >>> problem.getSolution() is None
+        True
+        >>> problem.addVariables(["a"], [42])
+        >>> problem.getSolution()
+        {'a': 42}
+
+        @return: Solution for the problem
+        @rtype: dictionary mapping variables to values
+        """
+        domains, constraints, vconstraints = self._getArgs()
+        if not domains:
+            return None
+        return self._solver.getSolution(domains, constraints, vconstraints, assignments)
+
+
     def getSolutions(self):
         """
         Find and return all solutions to the problem
@@ -668,12 +690,15 @@ class MinConflictsSolver(Solver):
         """
         self._steps = steps
 
-    def getSolution(self, domains, constraints, vconstraints):
-        assignments = {}
+    def getSolution(self, domains, constraints, vconstraints, assignments = {}):
+        #assignments = {}
         # Initial assignment
-        for variable in domains:
-            assignments[variable] = random.choice(domains[variable])
-        for _ in xrange(self._steps):
+        if not assignments:
+            print 'No assignments to start'
+            for variable in domains:
+                assignments[variable] = random.choice(domains[variable])
+        for x in xrange(self._steps):
+            print 'Min-conflict step %s' % x
             conflicted = False
             lst = domains.keys()
             random.shuffle(lst)
@@ -704,7 +729,7 @@ class MinConflictsSolver(Solver):
                 conflicted = True
             if not conflicted:
                 return assignments
-        return None
+        return assignments
 
 # ----------------------------------------------------------------------
 # Variables

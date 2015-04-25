@@ -35,7 +35,7 @@ def main(options):
     vehiclelist.genRandomDuration(unit,window_range)
   
     scheduler = sumolib.net.Scheduler(unit, capacity_per_unit, vehiclelist)
-    print scheduler()
+    scheduler()
     sumolib.net.generateRouteFile(options.outputfile, scheduler)
     
     if options.rand:
