@@ -670,17 +670,26 @@ class Scheduler:
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()
         capacity = self._rushhour_capacity
-        for step in range(3): 
-            self._problem = Problem(MinConflictsSolver())
+        for step in range(1): 
+            self._problem = Problem(MinConflictsSolver(10))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
             for v in vehicles:
                 window = self._id2window[v.getID()]
+                print(window)
                 self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
             self.setRushHourCapacity(capacity - step*2)
             for i in range(self._rushhour_period):
                 self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
             self._solution = self._problem.getMinConflictSolution(self._solution)
             print(self._solution)
+        
+        delay = []
+        for v in vehicles:
+            window = self._id2window[v.getID()]
+            delay.append(self._solution[v.getID()]-window[0]+1)
+        delay = np.array(delay)
+        print("average starting time slot")
+        print(np.mean(delay))
 
         return self.calcNewDepart()
 
