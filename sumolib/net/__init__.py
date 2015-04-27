@@ -562,10 +562,14 @@ class VehicleList:
             v.setDistancetoBottleneck(distance_to_bottleneck)
 
     def genRandomDuration(self, unit, window_range):
-        for v in self._vehicles:
+        window = [15, 11, 15, 5, 8, 14, 11, 9, 9, 14, 15, 15, 11, 7, 11, 15, 7, 13, 5, 14, 10, 10, 6, 8, 12, 5, 6, 13, 9, 12, 14, 11, 13, 13, 7, 7, 8, 9, 10, 5, 12, 11, 14, 14, 9, 6, 7, 11, 14, 13, 14, 7, 7, 14, 5, 5, 14, 11, 11, 13, 14, 15, 9, 10, 11, 6, 10, 9, 6, 9, 15, 14, 5, 10, 10, 9, 10, 11, 14, 10, 15, 7, 15, 10, 9, 11, 8, 10, 8, 6, 14, 7, 5, 9, 8, 14, 9, 8, 12, 5, 10, 15, 7, 10, 8, 8, 12, 5, 7, 12, 7, 5, 12, 5, 10, 8, 9, 12, 7, 9, 13, 12, 13, 11, 12, 14, 6, 9, 5, 8, 11, 13, 7, 8, 6, 11, 15, 6, 5, 13, 8, 5, 13, 14, 10, 7, 5, 13, 8, 10, 15, 5, 12, 15, 10, 9, 11, 8, 10, 9, 12, 7, 10, 8, 6, 8, 9, 5, 5, 10, 11, 15, 5, 8, 14, 6, 6, 12, 11, 5, 5, 13, 15, 14, 8, 11, 8, 10, 14, 8, 15, 6, 11, 5, 7, 8, 14, 14, 7, 14, 6, 12, 10, 9, 13, 15, 8, 11, 7, 14, 5, 13, 6, 11, 7, 14, 8, 8, 13, 6, 10, 9, 6, 15, 6, 8, 13, 9, 10, 10, 15, 13, 15, 15, 11, 7, 10, 11, 14, 9, 8, 13, 7, 12, 11, 5, 11, 6, 9, 15, 10, 6, 9, 13, 11, 12, 5, 8, 7, 7, 9, 14, 12, 8, 12, 15, 13, 13, 6, 15, 11, 15, 6, 10, 12, 7, 14, 8, 10, 8, 6, 10, 10, 7, 13, 5, 13, 11, 13, 8, 8, 15, 15, 14, 14, 5, 12, 12, 6, 9, 12, 12, 5, 10, 15]
+        #window = []
+        for i,v in enumerate(self._vehicles):
             #v.setTimeWindow(int(random.expovariate(rate)))
-            v.setTimeWindow(random.randrange(window_range[0], window_range[1]+1)*unit*2)
-            
+            #window.append(random.randrange(window_range[0], window_range[1]+1))
+            #v.setTimeWindow(window[i]*unit*2)
+            v.setTimeWindow(window[i]*unit*2)
+        #print(window)
 
     def calcTimeDistance(self, route, bottleneck):
         time = 0
@@ -646,17 +650,22 @@ class Scheduler:
 
     def calcExNewDepart(self, option):
         self._sorted_solution = {}
+        histogram = np.zeros(self._rushhour_period)
         for v in self._vehiclelist.getVehicles():
             window = self._id2window[v.getID()]
             if option == 1:
                 time_slot = random.randrange(window[0], window[1]+1)
             else:
                 time_slot = window[1]
+            histogram[time_slot] += 1
             newdeaprt = (time_slot+ self._rushhour_offset)*self._unit - v.getTimetoBottleneck()
             if newdeaprt < 0:
                 newdeaprt = 0
             self._sorted_solution[v.getID()] = newdeaprt
             v.setNewDepart(newdeaprt)
+
+        print("current capacity of slots (random or last):")
+        print(histogram)
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
         return self._sorted_solution
 
@@ -670,26 +679,36 @@ class Scheduler:
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()
         capacity = self._rushhour_capacity
-        for step in range(3): 
-            self._problem = Problem(MinConflictsSolver(10))
+        for step in range(1): 
+            self._problem = Problem(MinConflictsSolver(20))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
             for v in vehicles:
                 window = self._id2window[v.getID()]
-                print(window)
                 self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
             self.setRushHourCapacity(capacity - step*2)
             for i in range(self._rushhour_period):
                 self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
             self._solution = self._problem.getMinConflictSolution(self._solution)
             print(self._solution)
+
         
         delay = []
+        histogram_after = np.zeros(self._rushhour_period)
+        histogram_before = np.zeros(self._rushhour_period)
+        hiswin = [[] for i in range(self._rushhour_period)]
         for v in vehicles:
             window = self._id2window[v.getID()]
             delay.append(self._solution[v.getID()]-window[0]+1)
+            histogram_before[window[0]] += 1
+            histogram_after[self._solution[v.getID()]] += 1
+            hiswin[self._solution[v.getID()]].append([window[0],window[1]])
         delay = np.array(delay)
-        print("average starting time slot")
-        print(np.mean(delay))
+        print("average starting time slot = " + str(np.mean(delay)))
+        print("previous capacity of slots:")
+        print(histogram_before)
+        print("current capacity of slots:")
+        print(histogram_after)
+        print(hiswin)
 
         return self.calcNewDepart()
 

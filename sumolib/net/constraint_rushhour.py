@@ -697,6 +697,8 @@ class MinConflictsSolver(Solver):
             print 'No assignments to start'
             for variable in domains:
                 assignments[variable] = random.choice(domains[variable])
+                #assignments[variable] = domains[variable][0]
+
         for x in xrange(self._steps):
             print 'Min-conflict step %s' % x
             conflicted = False
@@ -712,6 +714,7 @@ class MinConflictsSolver(Solver):
                 # Variable has conflicts. Find values with less conflicts.
                 mincount = len(vconstraints[variable])
                 minvalues = []
+
                 for value in domains[variable]:
                     assignments[variable] = value
                     count = 0
@@ -726,6 +729,7 @@ class MinConflictsSolver(Solver):
                         minvalues.append(value)
                 # Pick a random one from these values.
                 assignments[variable] = random.choice(minvalues)
+                #assignments[variable] = minvalues[0]
                 conflicted = True
             if not conflicted:
                 return assignments
