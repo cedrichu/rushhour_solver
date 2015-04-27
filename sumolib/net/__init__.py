@@ -677,20 +677,20 @@ class Scheduler:
         return count < capacity
 
     def __call__(self):
-        vehicles = self._vehiclelist.getVehicles()
-        #capacity = self._rushhour_capacity
-        for step in range(2): 
-            self._problem = Problem(MinConflictsSolver(10))
+        vehicles = self._vehiclelist.getVehicles()[:]
+        capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
+        for step in range(1): 
+            self._problem = Problem(MinConflictsSolver(5))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
             for v in vehicles:
                 window = self._id2window[v.getID()]
                 self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
-            #self.setRushHourCapacity(capacity - step*2)
             for i in range(self._rushhour_period):
-                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, self._rushhour_capacity-step*2))
-            
-            ret = self._problem.getMinConflictSolution(self._solution)
+                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, capacity[i]-step*2))
+
+            ret = self._problem.getMinConflictSolution(self._solution.copy())
             if ret == None:
+                print('no solution')
                 break
             else:
                 self._solution = ret
@@ -713,7 +713,7 @@ class Scheduler:
         print(histogram_before)
         print("current capacity of slots:")
         print(histogram_after)
-        print(hiswin)
+        #print(hiswin)
 
         return self.calcNewDepart()
 
