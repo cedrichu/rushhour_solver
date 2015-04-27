@@ -612,8 +612,8 @@ class Scheduler:
         self._solution = {}
         self._sorted_solution = None
 
-    def setRushHourCapacity(self, capacity):
-        self._rushhour_capacity = capacity
+    #def setRushHourCapacity(self, capacity):
+     #   self._rushhour_capacity = capacity
 
     def setWindowList(self):
         window_list = []
@@ -669,27 +669,32 @@ class Scheduler:
         self._sorted_solution = sorted(self._sorted_solution.items(), key=operator.itemgetter(1))
         return self._sorted_solution
 
-    def capacityConstraint(self, time_index, *variables):
+    def capacityConstraint(self, time_index, capacity, *variables):
         count = 0
         for v in variables:
             if v == time_index:
                 count += 1
-        return count < self._rushhour_capacity
+        return count < capacity
 
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()
-        capacity = self._rushhour_capacity
-        for step in range(1): 
-            self._problem = Problem(MinConflictsSolver(20))
+        #capacity = self._rushhour_capacity
+        for step in range(2): 
+            self._problem = Problem(MinConflictsSolver(10))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
             for v in vehicles:
                 window = self._id2window[v.getID()]
                 self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
-            self.setRushHourCapacity(capacity - step*2)
+            #self.setRushHourCapacity(capacity - step*2)
             for i in range(self._rushhour_period):
-                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i))
-            self._solution = self._problem.getMinConflictSolution(self._solution)
-            print(self._solution)
+                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, self._rushhour_capacity-step*2))
+            
+            ret = self._problem.getMinConflictSolution(self._solution)
+            if ret == None:
+                break
+            else:
+                self._solution = ret
+                print(self._solution)
 
         
         delay = []

@@ -733,7 +733,7 @@ class MinConflictsSolver(Solver):
                 conflicted = True
             if not conflicted:
                 return assignments
-        return assignments
+        return None
 
 # ----------------------------------------------------------------------
 # Variables
@@ -997,7 +997,7 @@ class FunctionConstraintRushHour(Constraint):
     {'a': 1, 'b': 2}
     """#"""
  
-    def __init__(self, func, time_index, assigned=True):
+    def __init__(self, func, time_index, capacity, assigned=True):
         """
         @param func: Function wrapped and queried for constraint logic
         @type  func: callable object
@@ -1008,16 +1008,17 @@ class FunctionConstraintRushHour(Constraint):
         self._func = func
         self._assigned = assigned
         self._time_index = time_index
+        self._capacity = capacity
 
     def __call__(self, variables, domains, assignments, forwardcheck=False,
                  _unassigned=Unassigned):
         parms = [assignments.get(x, _unassigned) for x in variables]
         missing = parms.count(_unassigned)
         if missing:
-            return ((self._assigned or self._func(self._time_index, *parms)) and
+            return ((self._assigned or self._func(self._time_index, self._capacity, *parms)) and
                     (not forwardcheck or missing != 1 or
                      self.forwardCheck(variables, domains, assignments)))
-        return self._func(self._time_index, *parms)
+        return self._func(self._time_index, self._capacity, *parms)
 
 
 
