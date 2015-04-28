@@ -674,36 +674,102 @@ class Scheduler:
         for v in variables:
             if v == time_index:
                 count += 1
-        return count < capacity
+        return count <= capacity
 
+    # def __call__(self):
+    #     vehicles = self._vehiclelist.getVehicles()[:]
+    #     capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
+    #     for step in range(1): 
+    #         self._problem = Problem(MinConflictsSolver(5))
+    #         self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
+    #         for v in vehicles:
+    #             window = self._id2window[v.getID()]
+    #             self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
+    #         for i in range(self._rushhour_period):
+    #             self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, capacity[i]-step*2))
+
+    #         ret = self._problem.getMinConflictSolution(self._solution.copy())
+    #         if ret == None:
+    #             print('no solution')
+    #             break
+    #         else:
+    #             self._solution = ret
+    #             print(self._solution)
+        
+    #     delay = []
+    #     histogram_after = np.zeros(self._rushhour_period)
+    #     histogram_before = np.zeros(self._rushhour_period)
+    #     hiswin = [[] for i in range(self._rushhour_period)]
+    #     for v in vehicles:
+    #         window = self._id2window[v.getID()]
+    #         delay.append(self._solution[v.getID()]-window[0]+1)
+    #         histogram_before[window[0]] += 1
+    #         histogram_after[self._solution[v.getID()]] += 1
+    #         hiswin[self._solution[v.getID()]].append([window[0],window[1]])
+    #     delay = np.array(delay)
+    #     print("average starting time slot = " + str(np.mean(delay)))
+    #     print("previous capacity of slots:")
+    #     print(histogram_before)
+    #     print("current capacity of slots:")
+    #     print(histogram_after)
+    #     #print(hiswin)
+
+    #     return self.calcNewDepart()
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()[:]
         capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
-        for step in range(1): 
-            self._problem = Problem(MinConflictsSolver(5))
+        
+        for step in range(4): 
+            
+            self._problem = Problem(MinConflictsSolver(100))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
+            
+
             for v in vehicles:
                 window = self._id2window[v.getID()]
                 self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
             for i in range(self._rushhour_period):
-                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, capacity[i]-step*2))
+                self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, capacity[i]))
 
-            ret = self._problem.getMinConflictSolution(self._solution.copy())
+            ret = self._problem.getMinConflictSolution()
             if ret == None:
                 print('no solution')
                 break
             else:
-                self._solution = ret
+                for r in ret.keys():
+                    self._solution[r] = ret[r]
                 print(self._solution)
-
+            
+            count_capacity = np.zeros(self._rushhour_period)
+            countwin = [{} for i in range(self._rushhour_period)]
+            for v in self._vehiclelist.getVehicles():
+                count_capacity[self._solution[v.getID()]] += 1
+                countwin[self._solution[v.getID()]][v.getID()] = window[1]-window[0]+1
+            print(count_capacity)
+            capacity = self._rushhour_capacity- (step+1)*2 - count_capacity
+            print(capacity)
+            if sum(capacity) < 0:
+                break
+            vehicles = []
+            for i in range(self._rushhour_period):
+                if capacity[i] < 0:
+                    sorted_countwin= sorted(countwin[i].items(), key=operator.itemgetter(1))
+                    sorted_countwin.reverse()
+                    for j in range(abs(int(capacity[i]))):
+                        vehicles.append(self._vehiclelist.getVehicle(sorted_countwin[j][0]))
+                    capacity[i] = 0
+            
         
         delay = []
         histogram_after = np.zeros(self._rushhour_period)
         histogram_before = np.zeros(self._rushhour_period)
         hiswin = [[] for i in range(self._rushhour_period)]
-        for v in vehicles:
+        dist = np.zeros(self._rushhour_period)
+        for v in self._vehiclelist.getVehicles():
             window = self._id2window[v.getID()]
             delay.append(self._solution[v.getID()]-window[0]+1)
+            for i in range(window[1]-window[0]+1):
+                dist[window[0]+i] += 1
             histogram_before[window[0]] += 1
             histogram_after[self._solution[v.getID()]] += 1
             hiswin[self._solution[v.getID()]].append([window[0],window[1]])
@@ -713,7 +779,8 @@ class Scheduler:
         print(histogram_before)
         print("current capacity of slots:")
         print(histogram_after)
-        #print(hiswin)
+        print("vehicle distribution over time slots:")
+        print(dist)
 
         return self.calcNewDepart()
 

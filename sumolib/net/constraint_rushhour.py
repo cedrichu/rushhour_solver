@@ -691,8 +691,9 @@ class MinConflictsSolver(Solver):
         self._steps = steps
 
     def getSolution(self, domains, constraints, vconstraints, assignments = {}):
-        #assignments = {}
+        assignments = {}
         # Initial assignment
+        print assignments
         if not assignments:
             print 'No assignments to start'
             for variable in domains:
