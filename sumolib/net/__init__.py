@@ -562,14 +562,13 @@ class VehicleList:
             v.setDistancetoBottleneck(distance_to_bottleneck)
 
     def genRandomDuration(self, unit, window_range):
-        window = [15, 11, 15, 5, 8, 14, 11, 9, 9, 14, 15, 15, 11, 7, 11, 15, 7, 13, 5, 14, 10, 10, 6, 8, 12, 5, 6, 13, 9, 12, 14, 11, 13, 13, 7, 7, 8, 9, 10, 5, 12, 11, 14, 14, 9, 6, 7, 11, 14, 13, 14, 7, 7, 14, 5, 5, 14, 11, 11, 13, 14, 15, 9, 10, 11, 6, 10, 9, 6, 9, 15, 14, 5, 10, 10, 9, 10, 11, 14, 10, 15, 7, 15, 10, 9, 11, 8, 10, 8, 6, 14, 7, 5, 9, 8, 14, 9, 8, 12, 5, 10, 15, 7, 10, 8, 8, 12, 5, 7, 12, 7, 5, 12, 5, 10, 8, 9, 12, 7, 9, 13, 12, 13, 11, 12, 14, 6, 9, 5, 8, 11, 13, 7, 8, 6, 11, 15, 6, 5, 13, 8, 5, 13, 14, 10, 7, 5, 13, 8, 10, 15, 5, 12, 15, 10, 9, 11, 8, 10, 9, 12, 7, 10, 8, 6, 8, 9, 5, 5, 10, 11, 15, 5, 8, 14, 6, 6, 12, 11, 5, 5, 13, 15, 14, 8, 11, 8, 10, 14, 8, 15, 6, 11, 5, 7, 8, 14, 14, 7, 14, 6, 12, 10, 9, 13, 15, 8, 11, 7, 14, 5, 13, 6, 11, 7, 14, 8, 8, 13, 6, 10, 9, 6, 15, 6, 8, 13, 9, 10, 10, 15, 13, 15, 15, 11, 7, 10, 11, 14, 9, 8, 13, 7, 12, 11, 5, 11, 6, 9, 15, 10, 6, 9, 13, 11, 12, 5, 8, 7, 7, 9, 14, 12, 8, 12, 15, 13, 13, 6, 15, 11, 15, 6, 10, 12, 7, 14, 8, 10, 8, 6, 10, 10, 7, 13, 5, 13, 11, 13, 8, 8, 15, 15, 14, 14, 5, 12, 12, 6, 9, 12, 12, 5, 10, 15]
+        window = [7, 11, 9, 11, 11, 9, 10, 13, 6, 11, 5, 11, 9, 5, 14, 8, 10, 13, 5, 9, 9, 9, 8, 10, 14, 5, 15, 9, 7, 11, 7, 15, 6, 6, 5, 12, 11, 9, 5, 13, 10, 15, 10, 5, 6, 9, 11, 8, 9, 12, 11, 12, 15, 12, 7, 10, 9, 11, 6, 8, 9, 9, 14, 13, 15, 10, 14, 9, 11, 5, 8, 9, 15, 15, 14, 12, 12, 6, 9, 6, 7, 11, 5, 15, 12, 12, 8, 7, 7, 12, 15, 6, 5, 15, 12, 9, 13, 15, 13, 14, 10, 5, 6, 11, 6, 12, 5, 10, 12, 14, 8, 6, 5, 11, 6, 10, 5, 9, 10, 14, 15, 11, 6, 5, 8, 10, 14, 12, 8, 7, 5, 6, 12, 8, 8, 15, 12, 15, 7, 5, 14, 6, 15, 12, 7, 6, 7, 13, 5, 15, 6, 11, 13, 12, 10, 12, 5, 15, 11, 13, 14, 15, 15, 5, 11, 8, 6, 7, 13, 5, 9, 7, 15, 14, 14, 14, 5, 7, 7, 7, 13, 9, 11, 7, 8, 15, 9, 11, 12, 9]
         #window = []
         for i,v in enumerate(self._vehicles):
             #v.setTimeWindow(int(random.expovariate(rate)))
             #window.append(random.randrange(window_range[0], window_range[1]+1))
-            #v.setTimeWindow(window[i]*unit*2)
             v.setTimeWindow(window[i]*unit*2)
-        #print(window)
+        print(window)
 
     def calcTimeDistance(self, route, bottleneck):
         time = 0
@@ -581,6 +580,17 @@ class VehicleList:
             else:
                 break
         return int(time), int(distance)
+
+    def calMeanTraveltime(self):
+        travel_time = []
+        for v in self._vehicles:
+            time = 0
+            for r in v.getRoute():
+                time += r.getLength()/r.getSpeed()
+            travel_time.append(time)
+        print(travel_time)
+        print(sum(travel_time)/float(len(self._vehicles)))
+
 
     def getVehicles(self):
         return self._vehicles
@@ -680,7 +690,7 @@ class Scheduler:
     #     vehicles = self._vehiclelist.getVehicles()[:]
     #     capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
     #     for step in range(1): 
-    #         self._problem = Problem(MinConflictsSolver(5))
+    #         self._problem = Problem(MinConflictsSolver(50))
     #         self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
     #         for v in vehicles:
     #             window = self._id2window[v.getID()]
@@ -718,8 +728,9 @@ class Scheduler:
     def __call__(self):
         vehicles = self._vehiclelist.getVehicles()[:]
         capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
+        print(self._rushhour_period)
         
-        for step in range(4): 
+        for step in range(6): 
             
             self._problem = Problem(MinConflictsSolver(100))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
@@ -746,7 +757,7 @@ class Scheduler:
                 count_capacity[self._solution[v.getID()]] += 1
                 countwin[self._solution[v.getID()]][v.getID()] = window[1]-window[0]+1
             print(count_capacity)
-            capacity = self._rushhour_capacity- (step+1)*2 - count_capacity
+            capacity = self._rushhour_capacity- (step+1) - count_capacity
             print(capacity)
             if sum(capacity) < 0:
                 break

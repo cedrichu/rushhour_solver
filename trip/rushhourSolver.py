@@ -7,6 +7,7 @@ SUMO_HOME = os.environ.get('SUMO_HOME',
         os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 sys.path.append(os.path.join(SUMO_HOME, 'tools'))
 import sumolib
+import time
 
 
 def get_options(args=None):
@@ -27,12 +28,13 @@ def get_options(args=None):
 def main(options):
     window_range = [5,15]
     unit = 30
-    capacity_per_unit = 15
+    capacity_per_unit = 11
 
     net = sumolib.net.readNet(options.netfile)
     vehiclelist = sumolib.net.readVehicleList(options.routefile, net)
     vehiclelist.addBottlenecks('11950069')
     vehiclelist.genRandomDuration(unit,window_range)
+    #vehiclelist.calMeanTraveltime()
   
     scheduler = sumolib.net.Scheduler(unit, capacity_per_unit, vehiclelist)
     scheduler()
@@ -54,6 +56,8 @@ def main(options):
     
 
 if __name__ == "__main__":
+    start_time = time.time()
     main(get_options())
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 

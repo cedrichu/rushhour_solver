@@ -693,7 +693,6 @@ class MinConflictsSolver(Solver):
     def getSolution(self, domains, constraints, vconstraints, assignments = {}):
         assignments = {}
         # Initial assignment
-        print assignments
         if not assignments:
             print 'No assignments to start'
             for variable in domains:
@@ -1020,7 +1019,6 @@ class FunctionConstraintRushHour(Constraint):
                     (not forwardcheck or missing != 1 or
                      self.forwardCheck(variables, domains, assignments)))
         return self._func(self._time_index, self._capacity, *parms)
-
 
 
 class AllDifferentConstraint(Constraint):
