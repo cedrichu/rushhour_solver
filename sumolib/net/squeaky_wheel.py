@@ -38,10 +38,8 @@ class SWO(object):
 
 	def prioritize(self):
 		sorted_blame = sorted(self._blame.items(), key=operator.itemgetter(1), reverse=True)
-		#self._priority_sequence = []
 		violated_count = 0
 		for x in sorted_blame:
-			#self._priority_sequence.append(x[0])
 			if x[1] > 0:
 				del self._priority_sequence[self._priority_sequence.index(x[0])]
 				self._priority_sequence.insert(violated_count, x[0])
@@ -58,6 +56,13 @@ class GreedyRushHour(object):
 		self._capacity_array = None
 		self._solution = {}
 
+	@property
+	def capacity(self):
+		return self._capacity
+	@capacity.setter
+	def capacity(self, capacity):
+		self._capacity = capacity
+
 	def init_capacity_array(self):
 		return np.ones(len(self._id2window))* self._capacity
 
@@ -68,14 +73,13 @@ class GreedyRushHour(object):
 		return [x[0] for x in sorted(id2winlen.items(), key=operator.itemgetter(1))]
         
 	def __call__(self, pri_seq):
-		capacity_array = self.init_capacity_array()
+		self._capacity_array = self.init_capacity_array()
 		for vid in pri_seq:
 			start = self._id2window[vid][0]
-			while start < len(capacity_array) and not capacity_array[start] > 0:
+			while start < len(self._capacity_array) and not self._capacity_array[start] > 0:
 				start += 1
 			self._solution[vid] = start
-			capacity_array[start] -= 1
-		self._capacity_array = capacity_array
+			self._capacity_array[start] -= 1
 		return self._solution
 
 	def calc_blame(self, pri_seq):

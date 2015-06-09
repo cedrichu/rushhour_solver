@@ -739,21 +739,30 @@ class Scheduler:
 
     def squeaky_wheel(self):         
         
+        capacity_search = 8
+        swo_iteration = 20
         grh = GreedyRushHour(self._id2window, self._rushhour_capacity)
         swo = SWO(grh)
-        swo.priority_sequence = grh.init_pri_seq()
         
-        for step in range(20):
-            swo.construct()
-            swo.analyze()
-            if swo.prioritize() == 0:
-                print(step)
+        for iteration in range(capacity_search):
+            swo.priority_sequence = grh.init_pri_seq()
+            print('capacity = ', grh.capacity)
+            for step in range(swo_iteration):
+                swo.construct()
+                swo.analyze()
+                count = swo.prioritize()
+                print('step ', step)
+                print('count ', count)
                 print(swo.blame)
+                if count == 0:
+                    temp_solution = swo.solution.copy()
+                    break
+            else:
+                print('cannot find in ', grh.capacity)
                 break
-            print(step)
-            print(swo.blame)
+            grh.capacity -= 1
 
-        self._solution = swo.solution
+        self._solution = temp_solution
         self.print_solution()
         return self.calcNewDepart()
 
