@@ -18,6 +18,8 @@ def get_options(args=None):
                             help="define the net file (mandatory)")
     optParser.add_option("-o", "--output-file", dest="outputfile",
                             help="output sorted routing files")
+    optParser.add_option("-a", type="int", dest="algorithm",
+                         default=1, help="algorithm (default 1=minconflict)")
     optParser.add_option("--last", action="store_true",
                          default=False, help="run last time slot case")
     optParser.add_option("--rand", action="store_true",
@@ -28,7 +30,7 @@ def get_options(args=None):
 def main(options):
     window_range = [5,15]
     unit = 30
-    capacity_per_unit = 11
+    capacity_per_unit = 9
 
     net = sumolib.net.readNet(options.netfile)
     vehiclelist = sumolib.net.readVehicleList(options.routefile, net)
@@ -37,7 +39,12 @@ def main(options):
     #vehiclelist.calMeanTraveltime()
   
     scheduler = sumolib.net.Scheduler(unit, capacity_per_unit, vehiclelist)
-    scheduler()
+    if options.algorithm == 1:
+        print 'min-conflict'
+        scheduler.min_conflict()
+    elif options.algorithm == 2:
+        print 'squeaky wheel'
+        scheduler.squeaky_wheel()
     sumolib.net.generateRouteFile(options.outputfile, scheduler)
     
     if options.rand:

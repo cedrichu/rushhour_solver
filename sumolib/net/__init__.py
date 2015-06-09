@@ -41,6 +41,7 @@ from .roundabout import Roundabout
 import numpy as np
 #sys.path.append('/Users/hsuchieh/Documents/SUMO/python-constraint-1.2')
 from .constraint_rushhour import *
+from .squeaky_wheel import *
 import xml.etree.cElementTree as ET
 import operator
 
@@ -562,13 +563,12 @@ class VehicleList:
             v.setDistancetoBottleneck(distance_to_bottleneck)
 
     def genRandomDuration(self, unit, window_range):
-        window = [7, 11, 9, 11, 11, 9, 10, 13, 6, 11, 5, 11, 9, 5, 14, 8, 10, 13, 5, 9, 9, 9, 8, 10, 14, 5, 15, 9, 7, 11, 7, 15, 6, 6, 5, 12, 11, 9, 5, 13, 10, 15, 10, 5, 6, 9, 11, 8, 9, 12, 11, 12, 15, 12, 7, 10, 9, 11, 6, 8, 9, 9, 14, 13, 15, 10, 14, 9, 11, 5, 8, 9, 15, 15, 14, 12, 12, 6, 9, 6, 7, 11, 5, 15, 12, 12, 8, 7, 7, 12, 15, 6, 5, 15, 12, 9, 13, 15, 13, 14, 10, 5, 6, 11, 6, 12, 5, 10, 12, 14, 8, 6, 5, 11, 6, 10, 5, 9, 10, 14, 15, 11, 6, 5, 8, 10, 14, 12, 8, 7, 5, 6, 12, 8, 8, 15, 12, 15, 7, 5, 14, 6, 15, 12, 7, 6, 7, 13, 5, 15, 6, 11, 13, 12, 10, 12, 5, 15, 11, 13, 14, 15, 15, 5, 11, 8, 6, 7, 13, 5, 9, 7, 15, 14, 14, 14, 5, 7, 7, 7, 13, 9, 11, 7, 8, 15, 9, 11, 12, 9]
+        window = [10, 13, 8, 12, 11, 14, 15, 13, 5, 8, 13, 12, 13, 10, 9, 15, 15, 14, 6, 15, 12, 8, 14, 7, 13, 6, 12, 11, 8, 13, 11, 5, 6, 8, 13, 6, 9, 13, 13, 7, 7, 6, 15, 13, 6, 13, 5, 6, 12, 7, 8, 11, 10, 9, 5, 6, 10, 13, 14, 6, 13, 9, 12, 12, 15, 6, 7, 7, 15, 10, 11, 9, 10, 11, 7, 15, 8, 10, 11, 8, 6, 10, 6, 14, 7, 11, 15, 15, 15, 7, 7, 9, 6, 15, 12, 8, 6, 10, 10, 12, 8, 8, 11, 6, 8, 9, 5, 9, 10, 11, 8, 9, 11, 6, 9, 5, 8, 8, 7, 15, 9, 11, 6, 7, 15, 9, 14, 5, 12, 14, 14, 14, 15, 8, 10, 9, 12, 13, 9, 9, 7, 11, 14, 13, 5, 14, 6, 11, 11, 6, 9, 10, 14, 13, 8, 8, 13, 5, 12, 5, 11, 10, 12, 8, 6, 10, 5, 12, 14, 10, 9, 7, 5, 7, 12, 8, 14, 13, 7, 10, 9, 5, 6, 6, 9, 13, 10, 5, 11, 14, 5, 6, 8, 15, 14, 12, 9, 10, 9, 15, 13, 14, 8, 9, 15, 6, 10, 8, 10, 14, 6, 15, 12, 11, 11, 13, 7, 10, 12, 12, 9, 8, 8, 5, 7, 14, 9, 14, 10, 12, 12, 6, 14, 7, 8, 13, 6, 15, 15, 13, 7, 15, 7, 8, 5, 13, 11, 11, 8, 15, 12, 11, 10, 5, 6, 6, 7, 6, 15, 12, 14, 7, 14, 10, 11, 10, 14, 12, 12, 6, 12, 15, 8, 9, 6, 13, 14, 9, 6, 15, 12, 5, 12, 6, 13, 9, 6, 14, 9, 7, 13, 9, 7, 8, 11, 14, 12, 5, 9, 5, 14, 10, 15, 7, 5, 6, 5, 6, 7, 6, 11, 5, 11, 8, 14, 15, 8, 9, 13, 5, 15, 14, 13, 8, 11, 10, 9, 13, 11, 13, 12, 8, 14, 15, 9, 8, 13, 11, 7, 14, 12, 5, 13, 5, 12, 10, 5, 9, 5, 8, 5, 13, 6, 12, 14, 10, 6, 14, 7, 15, 11, 14, 8, 13, 15, 8, 12, 5, 10, 11, 6, 8, 6, 7, 14, 5, 13, 13, 6, 5, 13, 15, 9, 15]
         #window = []
         for i,v in enumerate(self._vehicles):
             #v.setTimeWindow(int(random.expovariate(rate)))
             #window.append(random.randrange(window_range[0], window_range[1]+1))
             v.setTimeWindow(window[i]*unit*2)
-        print(window)
 
     def calcTimeDistance(self, route, bottleneck):
         time = 0
@@ -638,8 +638,7 @@ class Scheduler:
 
         for i,v in enumerate(vehicles):
             self._id2window[v.getID()] = window_list[i,:]
-            #print(window_list[i,:])
-    
+  
         return window_list
     
     def shiftOffset(self, windowlist):
@@ -686,51 +685,13 @@ class Scheduler:
                 count += 1
         return count <= capacity
 
-    # def __call__(self):
-    #     vehicles = self._vehiclelist.getVehicles()[:]
-    #     capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
-    #     for step in range(1): 
-    #         self._problem = Problem(MinConflictsSolver(50))
-    #         self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
-    #         for v in vehicles:
-    #             window = self._id2window[v.getID()]
-    #             self._problem.addConstraint(InSetConstraint(range(window[0], window[1]+1)), [v.getID()])
-    #         for i in range(self._rushhour_period):
-    #             self._problem.addConstraint(FunctionConstraintRushHour(self.capacityConstraint, i, capacity[i]-step*2))
-
-    #         ret = self._problem.getMinConflictSolution(self._solution.copy())
-    #         if ret == None:
-    #             print('no solution')
-    #             break
-    #         else:
-    #             self._solution = ret
-    #             print(self._solution)
-        
-    #     delay = []
-    #     histogram_after = np.zeros(self._rushhour_period)
-    #     histogram_before = np.zeros(self._rushhour_period)
-    #     hiswin = [[] for i in range(self._rushhour_period)]
-    #     for v in vehicles:
-    #         window = self._id2window[v.getID()]
-    #         delay.append(self._solution[v.getID()]-window[0]+1)
-    #         histogram_before[window[0]] += 1
-    #         histogram_after[self._solution[v.getID()]] += 1
-    #         hiswin[self._solution[v.getID()]].append([window[0],window[1]])
-    #     delay = np.array(delay)
-    #     print("average starting time slot = " + str(np.mean(delay)))
-    #     print("previous capacity of slots:")
-    #     print(histogram_before)
-    #     print("current capacity of slots:")
-    #     print(histogram_after)
-    #     #print(hiswin)
-
-    #     return self.calcNewDepart()
-    def __call__(self):
+    
+    def min_conflict(self):
         vehicles = self._vehiclelist.getVehicles()[:]
         capacity = np.ones(self._rushhour_period)*self._rushhour_capacity
         print(self._rushhour_period)
         
-        for step in range(6): 
+        for step in range(8): 
             
             self._problem = Problem(MinConflictsSolver(100))
             self._problem.addVariables([v.getID() for v in vehicles], range(self._rushhour_period))
@@ -750,10 +711,12 @@ class Scheduler:
                 for r in ret.keys():
                     self._solution[r] = ret[r]
                 print(self._solution)
-            
+
+            # construct histogram for each slot
             count_capacity = np.zeros(self._rushhour_period)
             countwin = [{} for i in range(self._rushhour_period)]
             for v in self._vehiclelist.getVehicles():
+                window = self._id2window[v.getID()]
                 count_capacity[self._solution[v.getID()]] += 1
                 countwin[self._solution[v.getID()]][v.getID()] = window[1]-window[0]+1
             print(count_capacity)
@@ -761,6 +724,7 @@ class Scheduler:
             print(capacity)
             if sum(capacity) < 0:
                 break
+            #create violated vehicle list
             vehicles = []
             for i in range(self._rushhour_period):
                 if capacity[i] < 0:
@@ -768,9 +732,33 @@ class Scheduler:
                     sorted_countwin.reverse()
                     for j in range(abs(int(capacity[i]))):
                         vehicles.append(self._vehiclelist.getVehicle(sorted_countwin[j][0]))
-                    capacity[i] = 0
-            
+                    capacity[i] = 0     
         
+        self.print_solution()
+        return self.calcNewDepart()
+
+    def squeaky_wheel(self):         
+        
+        grh = GreedyRushHour(self._id2window, self._rushhour_capacity)
+        swo = SWO(grh)
+        swo.priority_sequence = grh.init_pri_seq()
+        
+        for step in range(20):
+            swo.construct()
+            swo.analyze()
+            if swo.prioritize() == 0:
+                print(step)
+                print(swo.blame)
+                break
+            print(step)
+            print(swo.blame)
+
+        self._solution = swo.solution
+        self.print_solution()
+        return self.calcNewDepart()
+
+
+    def print_solution(self):
         delay = []
         histogram_after = np.zeros(self._rushhour_period)
         histogram_before = np.zeros(self._rushhour_period)
@@ -785,6 +773,7 @@ class Scheduler:
             histogram_after[self._solution[v.getID()]] += 1
             hiswin[self._solution[v.getID()]].append([window[0],window[1]])
         delay = np.array(delay)
+        
         print("average starting time slot = " + str(np.mean(delay)))
         print("previous capacity of slots:")
         print(histogram_before)
@@ -793,7 +782,8 @@ class Scheduler:
         print("vehicle distribution over time slots:")
         print(dist)
 
-        return self.calcNewDepart()
+
+
 
     def getSortedSolution(self):
         return self._sorted_solution
