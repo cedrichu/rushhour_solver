@@ -45,6 +45,7 @@ def main(options):
     elif options.algorithm == 2:
         print 'squeaky wheel'
         scheduler.squeaky_wheel()
+        #scheduler.squeaky_wheel_partial()
     sumolib.net.generateRouteFile(options.outputfile, scheduler)
     
     if options.rand:

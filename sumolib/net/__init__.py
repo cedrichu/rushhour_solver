@@ -748,6 +748,7 @@ class Scheduler:
             swo.priority_sequence = grh.init_pri_seq()
             print('capacity = ', grh.capacity)
             for step in range(swo_iteration):
+                grh.capacity_array = grh.init_capacity_array()
                 swo.construct()
                 swo.analyze()
                 count = swo.prioritize()
@@ -763,6 +764,49 @@ class Scheduler:
             grh.capacity -= 1
 
         self._solution = temp_solution
+        self.print_solution()
+        return self.calcNewDepart()
+
+    def squeaky_wheel_partial(self):         
+        
+        capacity_search = 12
+        swo_iteration = 20
+        id2window_partial = {}
+        for key, value in self._id2window.iteritems():
+            if random.uniform(0,1) > 0.4:
+                id2window_partial[key] = value
+            else:
+                self._solution[key] = value[0]
+
+        grh = GreedyRushHour(id2window_partial, self._rushhour_capacity)
+        swo = SWO(grh)
+        
+        for iteration in range(capacity_search):
+            swo.priority_sequence = grh.init_pri_seq()
+            print('capacity = ', grh.capacity)
+            for step in range(swo_iteration):
+                grh.capacity_array = grh.init_capacity_array()
+                swo.construct()
+                swo.analyze()
+                count = swo.prioritize()
+                print('step ', step)
+                print('count ', count)
+                print(swo.blame)
+                if count == 0:
+                    temp_solution = swo.solution.copy()
+                    break
+            else:
+                print('cannot find in ', grh.capacity)
+                break
+            grh.capacity -= 1
+
+        hist = np.zeros(self._rushhour_period)
+        for key in temp_solution:
+            hist[temp_solution[key]] += 1
+        print("partial scheduled:")
+        print(hist)
+
+        self._solution.update(temp_solution)
         self.print_solution()
         return self.calcNewDepart()
 

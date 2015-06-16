@@ -62,6 +62,12 @@ class GreedyRushHour(object):
 	@capacity.setter
 	def capacity(self, capacity):
 		self._capacity = capacity
+	@property
+	def capacity_array(self):
+		return self._capacity_array
+	@capacity_array.setter
+	def capacity_array(self, capacity_array):
+		self._capacity_array = capacity_array
 
 	def init_capacity_array(self):
 		return np.ones(len(self._id2window))* self._capacity
@@ -73,7 +79,7 @@ class GreedyRushHour(object):
 		return [x[0] for x in sorted(id2winlen.items(), key=operator.itemgetter(1))]
         
 	def __call__(self, pri_seq):
-		self._capacity_array = self.init_capacity_array()
+		#self._capacity_array = self.init_capacity_array()
 		for vid in pri_seq:
 			start = self._id2window[vid][0]
 			while start < len(self._capacity_array) and not self._capacity_array[start] > 0:
@@ -85,7 +91,6 @@ class GreedyRushHour(object):
 	def calc_blame(self, pri_seq):
 		blame = {}
 		for id in pri_seq:
-			#blame[id] = (float(self._solution[id] - self._id2window[id][1]))/float(self._id2window[id][1] - self._id2window[id][0] +1)
 			blame[id] = self._solution[id] - self._id2window[id][1]
 		return blame
 
