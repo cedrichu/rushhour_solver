@@ -72,6 +72,11 @@ class GreedyRushHour(object):
 	def init_capacity_array(self):
 		return np.ones(len(self._id2window))* self._capacity
 
+	def init_capacity_array_partial(self):
+		cap = np.ones(len(self._id2window))* self._capacity
+		cap[7:17] = cap[7:17]/2 
+		return cap
+
 	def init_pri_seq(self):
 		id2winlen= {}
 		for key, value in self._id2window.iteritems():

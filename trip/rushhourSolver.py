@@ -28,9 +28,9 @@ def get_options(args=None):
     return options
 
 def main(options):
-    window_range = [5,15]
+    window_range = [10,60]
     unit = 30
-    capacity_per_unit = 14
+    capacity_per_unit = 20
 
     net = sumolib.net.readNet(options.netfile)
     vehiclelist = sumolib.net.readVehicleList(options.routefile, net)

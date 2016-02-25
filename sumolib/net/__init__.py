@@ -563,11 +563,11 @@ class VehicleList:
             v.setDistancetoBottleneck(distance_to_bottleneck)
 
     def genRandomDuration(self, unit, window_range):
-        window = [10, 13, 8, 12, 11, 14, 15, 13, 5, 8, 13, 12, 13, 10, 9, 15, 15, 14, 6, 15, 12, 8, 14, 7, 13, 6, 12, 11, 8, 13, 11, 5, 6, 8, 13, 6, 9, 13, 13, 7, 7, 6, 15, 13, 6, 13, 5, 6, 12, 7, 8, 11, 10, 9, 5, 6, 10, 13, 14, 6, 13, 9, 12, 12, 15, 6, 7, 7, 15, 10, 11, 9, 10, 11, 7, 15, 8, 10, 11, 8, 6, 10, 6, 14, 7, 11, 15, 15, 15, 7, 7, 9, 6, 15, 12, 8, 6, 10, 10, 12, 8, 8, 11, 6, 8, 9, 5, 9, 10, 11, 8, 9, 11, 6, 9, 5, 8, 8, 7, 15, 9, 11, 6, 7, 15, 9, 14, 5, 12, 14, 14, 14, 15, 8, 10, 9, 12, 13, 9, 9, 7, 11, 14, 13, 5, 14, 6, 11, 11, 6, 9, 10, 14, 13, 8, 8, 13, 5, 12, 5, 11, 10, 12, 8, 6, 10, 5, 12, 14, 10, 9, 7, 5, 7, 12, 8, 14, 13, 7, 10, 9, 5, 6, 6, 9, 13, 10, 5, 11, 14, 5, 6, 8, 15, 14, 12, 9, 10, 9, 15, 13, 14, 8, 9, 15, 6, 10, 8, 10, 14, 6, 15, 12, 11, 11, 13, 7, 10, 12, 12, 9, 8, 8, 5, 7, 14, 9, 14, 10, 12, 12, 6, 14, 7, 8, 13, 6, 15, 15, 13, 7, 15, 7, 8, 5, 13, 11, 11, 8, 15, 12, 11, 10, 5, 6, 6, 7, 6, 15, 12, 14, 7, 14, 10, 11, 10, 14, 12, 12, 6, 12, 15, 8, 9, 6, 13, 14, 9, 6, 15, 12, 5, 12, 6, 13, 9, 6, 14, 9, 7, 13, 9, 7, 8, 11, 14, 12, 5, 9, 5, 14, 10, 15, 7, 5, 6, 5, 6, 7, 6, 11, 5, 11, 8, 14, 15, 8, 9, 13, 5, 15, 14, 13, 8, 11, 10, 9, 13, 11, 13, 12, 8, 14, 15, 9, 8, 13, 11, 7, 14, 12, 5, 13, 5, 12, 10, 5, 9, 5, 8, 5, 13, 6, 12, 14, 10, 6, 14, 7, 15, 11, 14, 8, 13, 15, 8, 12, 5, 10, 11, 6, 8, 6, 7, 14, 5, 13, 13, 6, 5, 13, 15, 9, 15]
-        #window = []
+        #window = [10, 13, 8, 12, 11, 14, 15, 13, 5, 8, 13, 12, 13, 10, 9, 15, 15, 14, 6, 15, 12, 8, 14, 7, 13, 6, 12, 11, 8, 13, 11, 5, 6, 8, 13, 6, 9, 13, 13, 7, 7, 6, 15, 13, 6, 13, 5, 6, 12, 7, 8, 11, 10, 9, 5, 6, 10, 13, 14, 6, 13, 9, 12, 12, 15, 6, 7, 7, 15, 10, 11, 9, 10, 11, 7, 15, 8, 10, 11, 8, 6, 10, 6, 14, 7, 11, 15, 15, 15, 7, 7, 9, 6, 15, 12, 8, 6, 10, 10, 12, 8, 8, 11, 6, 8, 9, 5, 9, 10, 11, 8, 9, 11, 6, 9, 5, 8, 8, 7, 15, 9, 11, 6, 7, 15, 9, 14, 5, 12, 14, 14, 14, 15, 8, 10, 9, 12, 13, 9, 9, 7, 11, 14, 13, 5, 14, 6, 11, 11, 6, 9, 10, 14, 13, 8, 8, 13, 5, 12, 5, 11, 10, 12, 8, 6, 10, 5, 12, 14, 10, 9, 7, 5, 7, 12, 8, 14, 13, 7, 10, 9, 5, 6, 6, 9, 13, 10, 5, 11, 14, 5, 6, 8, 15, 14, 12, 9, 10, 9, 15, 13, 14, 8, 9, 15, 6, 10, 8, 10, 14, 6, 15, 12, 11, 11, 13, 7, 10, 12, 12, 9, 8, 8, 5, 7, 14, 9, 14, 10, 12, 12, 6, 14, 7, 8, 13, 6, 15, 15, 13, 7, 15, 7, 8, 5, 13, 11, 11, 8, 15, 12, 11, 10, 5, 6, 6, 7, 6, 15, 12, 14, 7, 14, 10, 11, 10, 14, 12, 12, 6, 12, 15, 8, 9, 6, 13, 14, 9, 6, 15, 12, 5, 12, 6, 13, 9, 6, 14, 9, 7, 13, 9, 7, 8, 11, 14, 12, 5, 9, 5, 14, 10, 15, 7, 5, 6, 5, 6, 7, 6, 11, 5, 11, 8, 14, 15, 8, 9, 13, 5, 15, 14, 13, 8, 11, 10, 9, 13, 11, 13, 12, 8, 14, 15, 9, 8, 13, 11, 7, 14, 12, 5, 13, 5, 12, 10, 5, 9, 5, 8, 5, 13, 6, 12, 14, 10, 6, 14, 7, 15, 11, 14, 8, 13, 15, 8, 12, 5, 10, 11, 6, 8, 6, 7, 14, 5, 13, 13, 6, 5, 13, 15, 9, 15]
+        window = []
         for i,v in enumerate(self._vehicles):
             #v.setTimeWindow(int(random.expovariate(rate)))
-            #window.append(random.randrange(window_range[0], window_range[1]+1))
+            window.append(random.randrange(window_range[0], window_range[1]+1))
             v.setTimeWindow(window[i]*unit*2)
 
     def calcTimeDistance(self, route, bottleneck):
@@ -739,7 +739,7 @@ class Scheduler:
 
     def squeaky_wheel(self):         
         
-        capacity_search = 8
+        capacity_search = 14
         swo_iteration = 20
         grh = GreedyRushHour(self._id2window, self._rushhour_capacity)
         swo = SWO(grh)
@@ -769,23 +769,24 @@ class Scheduler:
 
     def squeaky_wheel_partial(self):         
         
-        capacity_search = 12
+        capacity_search = 14
         swo_iteration = 20
+        scheduled_ratio = 0.2
         id2window_partial = {}
         for key, value in self._id2window.iteritems():
-            if random.uniform(0,1) > 0.4:
+            if random.uniform(0,1) < scheduled_ratio:
                 id2window_partial[key] = value
             else:
                 self._solution[key] = value[0]
 
         grh = GreedyRushHour(id2window_partial, self._rushhour_capacity)
         swo = SWO(grh)
-        
+
         for iteration in range(capacity_search):
             swo.priority_sequence = grh.init_pri_seq()
             print('capacity = ', grh.capacity)
             for step in range(swo_iteration):
-                grh.capacity_array = grh.init_capacity_array()
+                grh.capacity_array = grh.init_capacity_array_partial()
                 swo.construct()
                 swo.analyze()
                 count = swo.prioritize()
@@ -813,6 +814,7 @@ class Scheduler:
 
     def print_solution(self):
         delay = []
+        print('offset ', self._rushhour_offset)
         histogram_after = np.zeros(self._rushhour_period)
         histogram_before = np.zeros(self._rushhour_period)
         hiswin = [[] for i in range(self._rushhour_period)]
